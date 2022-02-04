@@ -14,9 +14,14 @@ SIM808::SIM808(uint8_t resetPin, uint8_t pwrKeyPin, uint8_t statusPin)
 	
 	if(_pwrKeyPin != SIM808_UNAVAILABLE_PIN) digitalWrite(_pwrKeyPin, HIGH);
 	digitalWrite(_resetPin, HIGH);
+	_userAgent = NULL;
 }
 
-SIM808::~SIM808() { }
+SIM808::~SIM808() {
+	if(_userAgent != NULL){
+		delete[] _userAgent;
+	}
+}
 
 #pragma region Public functions
 
@@ -43,6 +48,8 @@ void SIM808::reset()
 
 void SIM808::waitForReady()
 {
+	// we got AT, waiting for RDY
+	while (waitResponse(TO_F(TOKEN_RDY)) != 0);
 	do
 	{
 		SIM808_PRINT_SIMPLE_P("Waiting for echo...");
@@ -50,8 +57,6 @@ void SIM808::waitForReady()
 	// Despite official documentation, we can get an "AT" back without a "RDY" first.
 	} while (waitResponse(TO_F(TOKEN_AT)) != 0);
 
-	// we got AT, waiting for RDY
-	while (waitResponse(TO_F(TOKEN_RDY)) != 0);
 }
 
 bool SIM808::setEcho(SIM808Echo mode)

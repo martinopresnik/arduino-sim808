@@ -13,7 +13,7 @@ private:
 	uint8_t _resetPin;
 	uint8_t _statusPin;
 	uint8_t _pwrKeyPin;
-	const char* _userAgent;
+	char* _userAgent;
 
 	/**
 	 * Wait for the device to be ready to accept communcation.
@@ -174,6 +174,7 @@ public:
 	bool getGpsPosition(char* response, size_t responseSize);
 
 
+	void setHttpUserAgent(const char* value);
 	/**
 	 * Send an HTTP GET request and read the server response within the limit of responseSize.
 	 * 

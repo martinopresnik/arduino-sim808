@@ -43,6 +43,14 @@ bool SIM808::setHttpParameter(ATConstStr parameter, uint8_t value)
 	return waitResponse() == 0;
 }
 
+void SIM808::setHttpUserAgent(const char* value){
+	if(_userAgent != NULL){
+		delete[] _userAgent;
+	}
+	_userAgent = new char[strlen(value)+1];
+	strcpy(_userAgent, value);
+}
+
 uint16_t SIM808::httpGet(const char *url, char *response, size_t responseSize)
 {
 	uint16_t statusCode = 0;
