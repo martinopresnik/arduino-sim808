@@ -21,6 +21,10 @@ bool SIM808::setBearerSetting(ATConstStr parameter, const char* value)
 	return waitResponse() == 0;
 }
 
+void SIM808::setHttpTimeout(uint32_t timeout){
+	this->_httpTimeout = timeout;
+}
+
 bool SIM808::getGprsPowerState(bool *state)
 {
 	uint8_t result;

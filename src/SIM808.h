@@ -9,11 +9,12 @@
 
 class SIM808 : public SIMComAT
 {
-private:
+protected:
 	uint8_t _resetPin;
 	uint8_t _statusPin;
 	uint8_t _pwrKeyPin;
 	char* _userAgent;
+	uint32_t _httpTimeout;
 
 	/**
 	 * Wait for the device to be ready to accept communcation.
@@ -53,6 +54,8 @@ private:
 	 * Set one of the bearer settings for application based on IP.
 	 */
 	bool setBearerSetting(ATConstStr parameter, const char* value);
+
+	void setHttpTimeout(uint32_t timeout);
 
 public:
 	SIM808(uint8_t resetPin, uint8_t pwrKeyPin = SIM808_UNAVAILABLE_PIN, uint8_t statusPin = SIM808_UNAVAILABLE_PIN);

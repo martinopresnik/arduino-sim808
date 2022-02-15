@@ -11,13 +11,13 @@ void SIMComAT::begin(Stream& port)
 }
 
 void SIMComAT::flushInput() {
-	uint16_t timeout = 0;
+	uint32_t timeout = 0;
 	while(readNext(replyBuffer, BUFFER_SIZE, &timeout));
 	memset(replyBuffer, 0, BUFFER_SIZE);
 }
 
 
-size_t SIMComAT::readNext(char * buffer, size_t size, uint16_t * timeout, char stop)
+size_t SIMComAT::readNext(char * buffer, size_t size, uint32_t * timeout, char stop)
 {
 	size_t i = 0;
 	bool exit = false;
@@ -51,7 +51,7 @@ size_t SIMComAT::readNext(char * buffer, size_t size, uint16_t * timeout, char s
 	return i > 0 ? i - 1 : i;
 }
 
-int8_t SIMComAT::waitResponse(uint16_t timeout, 
+int8_t SIMComAT::waitResponse(uint32_t timeout,
 	ATConstStr s1, 
 	ATConstStr s2,
 	ATConstStr s3,

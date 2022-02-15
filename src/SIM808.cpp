@@ -7,6 +7,7 @@ SIM808::SIM808(uint8_t resetPin, uint8_t pwrKeyPin, uint8_t statusPin)
 	_resetPin = resetPin;
 	_pwrKeyPin = pwrKeyPin;
 	_statusPin = statusPin;
+	_httpTimeout = HTTP_TIMEOUT;
 
 	pinMode(_resetPin, OUTPUT);
 	if(_pwrKeyPin != SIM808_UNAVAILABLE_PIN) pinMode(_pwrKeyPin, OUTPUT);
@@ -71,7 +72,7 @@ size_t SIM808::sendCommand(const char *cmd, char *response, size_t responseSize)
 	flushInput();
 	sendAT(cmd);
 	
-	uint16_t timeout = SIMCOMAT_DEFAULT_TIMEOUT;
+	uint32_t timeout = SIMCOMAT_DEFAULT_TIMEOUT;
 	readNext(response, responseSize, &timeout);
 }
 

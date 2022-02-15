@@ -78,7 +78,7 @@ protected:
 	 * the stop character is encountered. timeout and char are optional
 	 * 
 	 */
-	size_t readNext(char * buffer, size_t size, uint16_t * timeout = NULL, char stop = 0);
+	size_t readNext(char * buffer, size_t size, uint32_t * timeout = NULL, char stop = 0);
 	int8_t waitResponse(
 		ATConstStr s1 = TO_F(TOKEN_OK),
 		ATConstStr s2 = TO_F(TOKEN_ERROR),
@@ -87,7 +87,7 @@ protected:
 			return waitResponse(SIMCOMAT_DEFAULT_TIMEOUT, s1, s2, s3, s4);
 		};
 
-	int8_t waitResponse(uint16_t timeout, 
+	int8_t waitResponse(uint32_t timeout,
 		ATConstStr s1 = TO_F(TOKEN_OK),
 		ATConstStr s2 = TO_F(TOKEN_ERROR),
 		ATConstStr s3 = NULL,
