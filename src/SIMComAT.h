@@ -9,11 +9,11 @@
 #if _SIM808_DEBUG
 	#define SIM808_PRINT(...) _debug.verbose(__VA_ARGS__)
 	#define SIM808_PRINT_CHAR(x) Serial.print((char)x)
-	#define SIM808_PRINT_P(fmt, ...) _debug.verbose(S_F(fmt "\n"), __VA_ARGS__)
-	#define SIM808_PRINT_SIMPLE_P(fmt) _debug.verbose(S_F(fmt "\n"))
+	#define SIM808_PRINT_P(fmt, ...) _debug.verbose(S_F(fmt "\r\n"), __VA_ARGS__)
+	#define SIM808_PRINT_SIMPLE_P(fmt) _debug.verbose(S_F(fmt "\r\n"))
 
 	#define RECEIVEARROW _debug.verbose(S_F("<--"))
-	#define SENDARROW _debug.verbose(S_F("\n-->"))
+	#define SENDARROW _debug.verbose(S_F("\r\n-->"))
 #else
 	#define SIM808_PRINT(...)
 	#define SIM808_PRINT_CHAR(x)
