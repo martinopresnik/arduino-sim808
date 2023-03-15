@@ -50,7 +50,9 @@ void SIM808::reset()
 void SIM808::waitForReady()
 {
 	// we got AT, waiting for RDY
-	while (waitResponse(TO_F(TOKEN_RDY)) != 0);
+	if(waitResponse(TO_F(TOKEN_RDY)) == 0){
+		SIM808_PRINT_SIMPLE_P("RDY not received!");
+	}
 	do
 	{
 		SIM808_PRINT_SIMPLE_P("Waiting for echo...");
