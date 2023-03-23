@@ -120,6 +120,8 @@ bool SIM808::fireHttpRequest(const SIM808HttpAction action, uint16_t *statusCode
 
 	return waitResponse(_httpTimeout, TO_F(TOKEN_HTTP_ACTION)) == 0 &&
 		parseReply(',', (uint8_t)SIM808HttpActionResponse::StatusCode, statusCode) &&
+		parseReply(',', (uint8_t)SIM808HttpActionResponse::StatusCode, statusCode) &&
+		parseReply(',', (uint8_t)SIM808HttpActionResponse::StatusCode, statusCode) &&
 		parseReply(',', (uint8_t)SIM808HttpActionResponse::DataLen, dataSize);
 }
 
