@@ -23,7 +23,7 @@ bool SIM808::powerOnOff(bool power)
 	SIM808_PRINT_P("powerOnOff: %t", power);
 
 	digitalWrite(_pwrKeyPin, LOW);
-	delay(1200);
+	delay(800);
 	digitalWrite(_pwrKeyPin, HIGH);
 
 	int16_t timeout = 2000;

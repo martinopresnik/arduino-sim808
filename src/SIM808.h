@@ -2,19 +2,26 @@
 
 #include <SIMComAT.h>
 #include "SIM808.Types.h"
+#include "SIMComTcp.h"
+#include <memory>;
 
 #define HTTP_TIMEOUT 10000L
 #define GPS_ACCURATE_FIX_MIN_SATELLITES 4
 #define SIM808_UNAVAILABLE_PIN 255
 
+class SIM808TcpClient;
+
 class SIM808 : public SIMComAT
 {
+	friend SIM808TcpClient;
 protected:
 	uint8_t _resetPin;
 	uint8_t _statusPin;
 	uint8_t _pwrKeyPin;
 	char* _userAgent;
 	uint32_t _httpTimeout;
+
+	std::shared_ptr<SIM808TcpClient> portClients[PORTS_NUM];
 
 	/**
 	 * Wait for the device to be ready to accept communcation.
@@ -57,6 +64,11 @@ protected:
 
 	void setHttpTimeout(uint32_t timeout);
 
+
+	int8_t openPortConnection(SIM808TcpClient *client, const char* host, uint16_t port);
+	int8_t writeToPort(SIM808TcpClient *client, const uint8_t *buf, size_t size);
+	void closePort(SIM808TcpClient *client);
+	void unexpectedResponse(char* response) override;
 public:
 	SIM808(uint8_t resetPin, uint8_t pwrKeyPin = SIM808_UNAVAILABLE_PIN, uint8_t statusPin = SIM808_UNAVAILABLE_PIN);
 	~SIM808();	
@@ -192,5 +204,14 @@ public:
 	 * have a high failure rate that make them unusuable reliably.
 	 */
 	uint16_t httpPost(const char* url, ATConstStr contentType, const char* body, char* response, size_t responseSize);	
+
+	/**
+	 * Set APN data and other parameters for TCP/UDP connections.
+	 * Returns true if initialized without errors.
+	 */
+	bool initTcpUdp(const char *apn, const char* user, const char *password);
+
+	std::shared_ptr<SIM808TcpClient> getClient(PortType portType=TCP);
+
 };
 

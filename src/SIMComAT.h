@@ -161,6 +161,8 @@ protected:
 	 * Perform the minmum commands needed to get the device communication up and running.
 	 */
 	virtual void init()=0;
+
+	virtual void unexpectedResponse(char* response) = 0;
 public:	
 	/**
 	 * Begin communicating with the device.
@@ -171,6 +173,16 @@ public:
 
 	int available() { return _port->available(); }
 	size_t write(uint8_t x) { SIM808_PRINT_CHAR(x); return _port->write(x); }
+	size_t write(const uint8_t *buffer, size_t size){
+#if _SIM808_DEBUG
+		char* tmpBuf = new char[size +1];
+		memcpy(tmpBuf, buffer, size);
+		tmpBuf[size] = '\0';
+		SIM808_PRINT(tmpBuf);
+		delete[] tmpBuf;
+#endif
+		return _port->write(buffer, size);
+	}
 	int read() { return _port->read(); }
 	int peek() { return _port->peek(); }
 	void flush() { return _port->flush(); }

@@ -19,6 +19,10 @@ void SIMComAT::flushInput() {
 
 size_t SIMComAT::readNext(char * buffer, size_t size, uint32_t * timeout, char stop)
 {
+	//TODO: Strategy to prevent cutting line in half.
+	// There is now problem with TCP/UDP ports, Data can be received at any time,
+	// if message is received at the end of timeout, it can be cut off.
+	// Idea 1: if received something, extend timeout by 2 (there should still be limit!)
 	size_t i = 0;
 	bool exit = false;
 
@@ -65,7 +69,6 @@ int8_t SIMComAT::waitResponse(uint32_t timeout,
 		length = readNext(replyBuffer, BUFFER_SIZE, &timeout, '\n');
 
 		if(!length) continue; 					//read nothing
-		if(wantedTokens[0] == NULL) return 0;	//looking for a line with any content
 
 		for(uint8_t i = 0; i < 4; i++) {
 			if(wantedTokens[i]) {
@@ -73,6 +76,12 @@ int8_t SIMComAT::waitResponse(uint32_t timeout,
 				if(replyBuffer == p) return i;				
 			}
 		}
+
+		// Received something unexpected, might be something received on TCP/UDP port
+		if(strcmp(replyBuffer, TO_P("\r\n")) != 0){
+			unexpectedResponse(replyBuffer);
+		}
+		if(wantedTokens[0] == NULL) return 0;	//looking for a line with any content
 	} while(timeout);
 
 	return -1;

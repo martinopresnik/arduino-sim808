@@ -16,6 +16,10 @@ SIM808::SIM808(uint8_t resetPin, uint8_t pwrKeyPin, uint8_t statusPin)
 	if(_pwrKeyPin != SIM808_UNAVAILABLE_PIN) digitalWrite(_pwrKeyPin, HIGH);
 	digitalWrite(_resetPin, HIGH);
 	_userAgent = NULL;
+
+	for(int i = 0; i < PORTS_NUM; ++i){
+		portClients[i] = nullptr;
+	}
 }
 
 SIM808::~SIM808() {
@@ -50,7 +54,7 @@ void SIM808::reset()
 void SIM808::waitForReady()
 {
 	// we got AT, waiting for RDY
-	while (waitResponse(TO_F(TOKEN_RDY)) != 0);
+	//while (waitResponse(TO_F(TOKEN_RDY)) != 0);
 	do
 	{
 		SIM808_PRINT_SIMPLE_P("Waiting for echo...");
