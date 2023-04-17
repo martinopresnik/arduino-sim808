@@ -117,6 +117,11 @@ public:
 	 * Unlock the SIM card using the provided pin. Beware of failed attempts !
 	 */
 	bool simUnlock(const char* pin);
+
+	/**
+	 * Removes pin code. Should first unlock it using simUnlock.
+	 */
+	bool simRemovePin(const char* pin);
 	/**
 	 * Get a string indicating the current sim state.
 	 */

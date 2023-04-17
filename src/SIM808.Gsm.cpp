@@ -3,12 +3,21 @@
 AT_COMMAND(SEND_SMS, "+CMGS=\"%s\"");
 
 TOKEN_TEXT(CPIN, "+CPIN");
+TOKEN_TEXT(CLCK, "+CLCK");
 TOKEN_TEXT(CSQ, "+CSQ");
 TOKEN_TEXT(CMGS, "+CMGS");
 
 bool SIM808::simUnlock(const char* pin)
 {
 	sendAT(TO_F(TOKEN_CPIN), TO_F(TOKEN_WRITE), pin);
+
+	return waitResponse(5000L) == 0;
+}
+
+
+bool SIM808::simRemovePin(const char* oldPin)
+{
+	sendAT(TO_F(TOKEN_CLCK), TO_F(TOKEN_WRITE), TO_F("\"SC\",0,\""), oldPin, TO_F("\""));
 
 	return waitResponse(5000L) == 0;
 }
