@@ -14,6 +14,7 @@ TOKEN_TEXT(CGATT, "+CGATT");
 TOKEN_TEXT(CIPSHUT, "+CIPSHUT");
 TOKEN_TEXT(SHUT_OK, "SHUT OK");
 TOKEN_TEXT(CGREG, "+CGREG");
+TOKEN_TEXT(CLTS, "+CLTS");
 
 bool SIM808::setBearerSetting(ATConstStr parameter, const char* value)
 {
@@ -64,6 +65,24 @@ bool SIM808::disableGprs()
 		(sendFormatAT(TO_F(AT_COMMAND_SET_BEARER_SETTING), 0, 1), waitResponse(65000L) != -1) &&			//AT+SAPBR=0,1
 		(sendAT(TO_F(TOKEN_CIPSHUT)), waitResponse(65000L, TO_F(TOKEN_SHUT_OK)) == 0) &&					//AT+CIPSHUT
 		(sendFormatAT(TO_F(AT_COMMAND_GPRS_ATTACH), 0), waitResponse(10000L) == 0);							//AT+CGATT=0
+}
+
+bool SIM808::ltsTimeEnabled(){
+	sendAT(TO_F(TOKEN_CLTS), TO_F(TOKEN_READ));
+	uint8_t result;
+
+	if(waitResponse(10000L, TO_F(TOKEN_CLTS)) != 0 || !parseReply(' ', 0, &result)){
+		return false;
+	}
+	return result;
+}
+
+void SIM808::ltsEnable(bool enable){
+	char e = enable ? '1' : '0';
+	sendAT(TO_F(TOKEN_CLTS), TO_F(TOKEN_WRITE), e);
+	waitResponse();
+	sendAT(TO_F(AT_COMMAND_SAVE_MEMORY));
+	waitResponse();
 }
 
 SIM808NetworkRegistrationState SIM808::getNetworkRegistrationStatus()

@@ -154,6 +154,17 @@ public:
 	 * Shutdown GPRS properly.
 	 */
 	bool disableGprs();
+
+	/*
+	 * LTS system receives time from mobile network and forwards it to GPS.
+	 * Check if LTS is enabled.
+	 */
+	bool ltsTimeEnabled();
+
+	/*
+	 * Enable or disable LTS.
+	 */
+	void ltsEnable(bool enable);
 	/**
 	 * Get the device current network registration status.
 	 */
