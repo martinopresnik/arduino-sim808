@@ -7,6 +7,8 @@ TOKEN_TEXT(TCP_CIICR, "+CIICR");
 TOKEN_TEXT(TCP_CIFSR, "+CIFSR");
 TOKEN_TEXT(TCP_CIPSEND, "+CIPSEND=%d,%d");
 
+TOKEN_TEXT(TCP_CIPSTATUS, "+CIPSTATUS=%d");
+
 TOKEN_TEXT(TCP_CIPSTART, "+CIPSTART=%d,\"%s\",\"%s\",\"%d\"");
 TOKEN_TEXT(TCP_CIPCLOSE, "+CIPCLOSE=%d,0");
 
@@ -25,16 +27,25 @@ bool SIM808::initTcpUdp(const char *apn, const char *user, const char *password)
 	return allGood;
 }
 
-std::shared_ptr<SIM808TcpClient> SIM808::getClient(PortType portType) {
-	for (int i = 0; i < PORTS_NUM; ++i) {
-		if (portClients[i] == nullptr) {
-			std::shared_ptr<SIM808TcpClient> r(
-					new SIM808TcpClient(this, 0, portType));
-			portClients[i] = r;
-			return r;
+std::shared_ptr<SIM808TcpClient> SIM808::getClient(uint8_t number, PortType portType) {
+	if(number == -1){
+		for (int i = 0; i < PORTS_NUM; ++i) {
+			if (portClients[i] == nullptr){
+				number = i;
+				break;
+			}
+		}
+		if(number == -1){
+			return nullptr;
 		}
 	}
-	return nullptr;
+
+	if (portClients[number] == nullptr) {
+		std::shared_ptr<SIM808TcpClient> r(
+				new SIM808TcpClient(this, 0, portType));
+		portClients[number] = r;
+	}
+	return portClients[number];
 }
 
 int8_t SIM808::openPortConnection(
@@ -52,8 +63,7 @@ int8_t SIM808::openPortConnection(
 	waitResponse();
 	char indexStr[2];
 	sprintf(indexStr, "%d", client->index);
-	waitResponse(_httpTimeout, indexStr);
-
+	client->_connected = waitResponse(_httpTimeout, indexStr) == 0;
 	return 0;
 }
 
@@ -61,8 +71,11 @@ int8_t SIM808::writeToPort(
 		SIM808TcpClient *client,
 		const uint8_t *buf,
 		size_t size) {
-	sendFormatAT(TO_F(TOKEN_TCP_CIPSEND), client->index, size);
 	uint32_t timeout = SIMCOMAT_DEFAULT_TIMEOUT;
+
+	// Variable will be changed in "unexpectedResponse"
+	client->sendType = SIM808TcpClient::SendType::NONE;
+	sendFormatAT(TO_F(TOKEN_TCP_CIPSEND), client->index, size);
 	auto length = readNext(replyBuffer, BUFFER_SIZE, &timeout, '>');
 	write(buf, size);
 
@@ -70,7 +83,69 @@ int8_t SIM808::writeToPort(
 	char response[20];
 	readNext(response, 20, &timeout, '\n');
 
+	waitResponse(HTTP_TIMEOUT, NULL, NULL, NULL, NULL);
+	if(client->sendType != SIM808TcpClient::SendType::SUCCESS){
+		closePort(client);
+		client->_connected = false;
+		return -1;
+	}
+
 	return size;
+}
+
+TcpStatus SIM808::portStatus(SIM808TcpClient *client){
+	uint32_t timeout = SIMCOMAT_DEFAULT_TIMEOUT;
+	bool receivedOk = false;
+	bool receivedStatus = false;
+	sendFormatAT(TOKEN_TCP_CIPSTATUS, client->index);
+
+	do{
+		auto response = waitResponse(timeout, "+CIPSTATUS", "OK");
+		receivedOk = response == 1 || receivedOk;
+		receivedStatus = response == 0;
+		if(!timeout){
+			return UNKNOWN;
+		}
+		/*
+		if(receivedOk){
+			Serial.println("Received OK");
+		}
+		Serial.print("Len: ");
+		Serial.println(strlen(replyBuffer));
+		Serial.println(replyBuffer);
+		*/
+	}while(!receivedStatus);
+
+	char* status = find(replyBuffer, ',', 5);
+	if(status == NULL){
+		return UNKNOWN;
+	}
+
+	char* statusOptions[] = {
+			"\"INITIAL\"",
+			"\"CONNECTING\"",
+			"\"CONNECTED\"",
+			"\"REMOTE CLOSING\"",
+			"\"CLOSING\"",
+			"\"CLOSED\""
+	};
+
+	TcpStatus result = UNKNOWN;
+	for(int i = 0; i < 6; i++){
+		if(strstr(status, statusOptions[i]) != NULL){
+			result = (TcpStatus)i;
+			break;
+		}
+	}
+
+	while(!receivedOk){
+		receivedOk = waitResponse(timeout) == 0;
+		if(!timeout){
+			return UNKNOWN;
+		}
+	}
+
+	return result;
 }
 
 void SIM808::closePort(SIM808TcpClient *client) {
@@ -80,8 +155,9 @@ void SIM808::closePort(SIM808TcpClient *client) {
 
 void SIM808::unexpectedResponse(char *response) {
 	// Check if received something on TCP/UDP port
-	char *p = strstr_P(response, TO_P("+RECEIVE"));
-	if (response == p) {
+	char *receive = strstr_P(response, TO_P("+RECEIVE"));
+	if (response == receive) {
+		// Receiving something on TCP/UDP port
 		size_t dataSize;
 		uint8_t portIndex;
 
@@ -90,11 +166,16 @@ void SIM808::unexpectedResponse(char *response) {
 		char seperator[3];
 		strcpy(seperator, ",");
 
-		p = strstr(response, TO_P(","))+1; // Finds first char after ","
-		portIndex = (uint8_t)strtoull(p, &p, 10); // p is now at 2nd ,
-		p++; // move p to 2nd number
+		receive = strstr(response, TO_P(",")); // Find ","
+		if(receive == nullptr){
+			SIM808_PRINT("Missing part of line, this should not happen!");
+			return;
+		}
+		receive = receive+1; // Move to first char after ","
+		portIndex = (uint8_t)strtoull(receive, &receive, 10); // p is now at 2nd ,
+		receive++; // move p to 2nd number
 
-		dataSize = strtoull((char*)p, NULL, 10);
+		dataSize = strtoull((char*)receive, NULL, 10);
 
 		if (portClients[portIndex] == nullptr) {
 			// Port not opened, something is wrong, just clear serial buffer
@@ -119,18 +200,36 @@ void SIM808::unexpectedResponse(char *response) {
 		}
 		SIM808_PRINT_SIMPLE_P(TO_P(""));
 	}
+	char *pdpDeact = strstr_P(response, TO_P("+PDP: DEACT"));
+	if (response == pdpDeact) {
+		disableGprs();
+	}
 
-	// When TCP/UDP port is closed
-	// Examle1: '0, CLOSED'
-	// Examle1: '0, CLOSE OK'
-	if(strstr_P(response, TO_P(", CLOSE")) == &response[1]){
+	// if it starts with number, it's something with TCP/UDP
+	if(isdigit(response[0])){
+
 		uint8_t index = (uint8_t)strtoul(response, NULL, 10);
 		if(index >= PORTS_NUM){
 			SIM808_PRINT_SIMPLE_P("Wrong index, this should never occur!!!");
-		}else{
+			return;
+		}
+
+		// When TCP/UDP port is closed
+		// Examle1: '0, CLOSED'
+		// Examle1: '0, CLOSE OK'
+		if(strstr_P(response, TO_P(", CLOSE")) == &response[1]){
 			portClients[index]->_connected = false;
 		}
 
+
+		if(strstr_P(response, TO_P(", SEND OK")) == &response[1]){
+			portClients[index]->sendType = SIM808TcpClient::SendType::SUCCESS;
+		}
+
+		if(strstr_P(response, TO_P(", ERROR")) == &response[1]){
+			portClients[index]->sendType = SIM808TcpClient::SendType::ERROR;
+		}
 	}
+
 }
 

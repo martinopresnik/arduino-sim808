@@ -8,6 +8,7 @@ SIM808::SIM808(uint8_t resetPin, uint8_t pwrKeyPin, uint8_t statusPin)
 	_pwrKeyPin = pwrKeyPin;
 	_statusPin = statusPin;
 	_httpTimeout = HTTP_TIMEOUT;
+	_gprsEnabled = false;
 
 	pinMode(_resetPin, OUTPUT);
 	if(_pwrKeyPin != SIM808_UNAVAILABLE_PIN) pinMode(_pwrKeyPin, OUTPUT);

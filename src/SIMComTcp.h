@@ -8,6 +8,16 @@ enum PortType {
 	TCP, UDP
 };
 
+enum TcpStatus{
+	INITIAL=0,
+	CONNECTING=1,
+	CONNECTED=2,
+	REMOTE_CLOSING=3,
+	CLOSING=4,
+	CLOSED=5,
+	UNKNOWN=6
+};
+
 #define PORTS_NUM 6
 
 #include "SIM808.h"
@@ -54,6 +64,7 @@ public:
 	operator bool() {
 		return connected();
 	}
+	TcpStatus status();
 
 protected:
 	const uint8_t index;
@@ -61,9 +72,11 @@ protected:
 	const PortType portType;
 	SIM808 *sim;
 	bool defaultWaitForAvailable;
+	size_t transmitBufferSize;
 	std::vector<uint8_t> transmitBuffer;
 	std::list<std::vector<uint8_t>> receiveBuffer;
 	size_t bufferIndex;
 	bool _connected;
+	enum SendType {NONE, SUCCESS, ERROR} sendType;
 };
 

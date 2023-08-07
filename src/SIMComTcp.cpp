@@ -10,10 +10,10 @@ SIM808TcpClient::SIM808TcpClient(SIM808 *sim, uint8_t index, PortType portType) 
 }
 
 int SIM808TcpClient::connect(const char *host, uint16_t port) {
-	if (sim->openPortConnection(this, host, port) == 0) {
+	if(connected()){
 		return 0;
 	}
-	return 1;
+	return sim->openPortConnection(this, host, port);
 }
 
 void SIM808TcpClient::setDefaultWaitForAvailable(bool waitResponse) {
@@ -21,19 +21,20 @@ void SIM808TcpClient::setDefaultWaitForAvailable(bool waitResponse) {
 }
 
 void SIM808TcpClient::setTransmitBufferSize(size_t size){
-	if(size < transmitBuffer.size()){
-		flush();
-	}
+	transmitBufferSize = size;
 	transmitBuffer.reserve(size);
 }
 
 size_t SIM808TcpClient::write(const uint8_t *buffer, size_t size) {
-	return sim->writeToPort(this, buffer, size);
+	for(int i = 0; i < size; i++){
+		write(buffer[i]);
+	}
+	return size;
 }
 
 size_t SIM808TcpClient::write(uint8_t data) {
 	transmitBuffer.push_back(data);
-	if(transmitBuffer.size() == transmitBuffer.capacity()){
+	if(transmitBuffer.size() >= transmitBufferSize){
 		flush();
 	}
 	return 1;
@@ -45,7 +46,7 @@ int SIM808TcpClient::available(void) {
 
 int SIM808TcpClient::available(bool check) {
 	if (check) {
-		sim->waitResponse(1000);
+		sim->waitResponse(10);
 	}
 
 	size_t size = 0;
@@ -75,9 +76,8 @@ int SIM808TcpClient::peek() {
 }
 
 void SIM808TcpClient::flush() {
-	write(transmitBuffer.data(), transmitBuffer.size());
+	sim->writeToPort(this, transmitBuffer.data(), transmitBuffer.size());
 	transmitBuffer.clear();
-	return;
 }
 
 int SIM808TcpClient::connect(IPAddress address, uint16_t port) {
@@ -95,5 +95,10 @@ void SIM808TcpClient::stop() {
 	sim->closePort(this);
 }
 uint8_t SIM808TcpClient::connected() {
-	return _connected;
+	auto stat = status();
+	return stat == CONNECTED;
+}
+
+TcpStatus SIM808TcpClient::status(){
+	return sim->portStatus(this);
 }

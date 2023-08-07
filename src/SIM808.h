@@ -20,6 +20,7 @@ protected:
 	uint8_t _pwrKeyPin;
 	char* _userAgent;
 	uint32_t _httpTimeout;
+	bool _gprsEnabled;
 
 	std::shared_ptr<SIM808TcpClient> portClients[PORTS_NUM];
 
@@ -67,6 +68,7 @@ protected:
 
 	int8_t openPortConnection(SIM808TcpClient *client, const char* host, uint16_t port);
 	int8_t writeToPort(SIM808TcpClient *client, const uint8_t *buf, size_t size);
+	TcpStatus portStatus(SIM808TcpClient *client);
 	void closePort(SIM808TcpClient *client);
 	void unexpectedResponse(char* response) override;
 public:
@@ -155,6 +157,8 @@ public:
 	 */
 	bool disableGprs();
 
+	bool gprsEnabled();
+
 	/*
 	 * LTS system receives time from mobile network and forwards it to GPS.
 	 * Check if LTS is enabled.
@@ -227,7 +231,7 @@ public:
 	 */
 	bool initTcpUdp(const char *apn, const char* user, const char *password);
 
-	std::shared_ptr<SIM808TcpClient> getClient(PortType portType=TCP);
+	std::shared_ptr<SIM808TcpClient> getClient(uint8_t number = -1, PortType portType=TCP);
 
 };
 

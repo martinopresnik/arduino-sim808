@@ -23,6 +23,7 @@ size_t SIMComAT::readNext(char * buffer, size_t size, uint32_t * timeout, char s
 	// There is now problem with TCP/UDP ports, Data can be received at any time,
 	// if message is received at the end of timeout, it can be cut off.
 	// Idea 1: if received something, extend timeout by 2 (there should still be limit!)
+	// Idea 2: extend timeout by X when something received (used this idea, try something else, if this doesn't work)
 	size_t i = 0;
 	bool exit = false;
 
@@ -31,7 +32,9 @@ size_t SIMComAT::readNext(char * buffer, size_t size, uint32_t * timeout, char s
 			char c = read();
 			buffer[i] = c;
 			i++;
-
+			if(timeout && (*timeout) < 10){
+				(*timeout) += 10;
+			}
 			exit |= stop && c == stop;
 		}
 
