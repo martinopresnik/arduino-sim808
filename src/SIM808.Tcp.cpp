@@ -71,7 +71,7 @@ int8_t SIM808::writeToPort(
 		SIM808TcpClient *client,
 		const uint8_t *buf,
 		size_t size) {
-	uint32_t timeout = SIMCOMAT_DEFAULT_TIMEOUT;
+	uint32_t timeout = _httpTimeout;
 
 	// Variable will be changed in "unexpectedResponse"
 	client->sendType = SIM808TcpClient::SendType::NONE;
@@ -79,11 +79,11 @@ int8_t SIM808::writeToPort(
 	auto length = readNext(replyBuffer, BUFFER_SIZE, &timeout, '>');
 	write(buf, size);
 
-	timeout = _httpTimeout;
-	char response[20];
-	readNext(response, 20, &timeout, '\n');
+	//char response[20];
+	//readNext(response, 20, &timeout, '\n');
 
-	waitResponse(HTTP_TIMEOUT, NULL, NULL, NULL, NULL);
+	waitResponse(timeout, NULL, NULL, NULL, NULL);
+	waitResponse(timeout, NULL, NULL, NULL, NULL);
 	if(client->sendType != SIM808TcpClient::SendType::SUCCESS){
 		closePort(client);
 		client->_connected = false;
