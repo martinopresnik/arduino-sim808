@@ -175,12 +175,18 @@ public:
 	size_t write(uint8_t x) { SIM808_PRINT_CHAR(x); return _port->write(x); }
 	size_t write(const uint8_t *buffer, size_t size){
 #if _SIM808_DEBUG
+		/*
 		char* tmpBuf = new char[size +1];
 		memcpy(tmpBuf, buffer, size);
 		tmpBuf[size] = '\0';
 		SIM808_PRINT(tmpBuf);
 		delete[] tmpBuf;
+		*/
+		for(size_t i = 0; i < size; i++){
+			SIM808_PRINT_CHAR(buffer[i]);
+		}
 #endif
+
 		return _port->write(buffer, size);
 	}
 	int read() { return _port->read(); }

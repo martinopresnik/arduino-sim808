@@ -188,15 +188,27 @@ void SIM808::unexpectedResponse(char *response) {
 
 		portClients[portIndex]->receiveBuffer.push_back(std::vector<uint8_t>());
 		auto bufferChunk = &portClients[portIndex]->receiveBuffer.back();
-		bufferChunk->resize(dataSize);
+		bufferChunk->reserve(dataSize);
+
+
+		double tmpTimeout = dataSize * 1.05; // Calculated for 9600 baudrate, change for other baudrates
+		unsigned long timeout = (unsigned long)(tmpTimeout) + 1000; // Add a sec for reliability
+
+
+		auto receiveStartTime = millis();
 
 		RECEIVEARROW;
 		for (int i = 0; i < dataSize; ++i) {
-			while (!available())
-				;
+			while (!available()){
+				if(millis() - receiveStartTime > timeout){
+					Serial.println("TCP/UDP Receive timeout!");
+					portClients[portIndex]->stop();
+					return;
+				}
+			}
 			uint8_t c = (uint8_t)read();
 			SIM808_PRINT_CHAR(c);
-			(*bufferChunk)[i] = c;
+			bufferChunk->push_back(c);
 		}
 		SIM808_PRINT_SIMPLE_P(TO_P(""));
 	}
