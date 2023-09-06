@@ -77,6 +77,6 @@ protected:
 	std::list<std::vector<uint8_t>> receiveBuffer;
 	size_t bufferIndex;
 	bool _connected;
-	enum SendType {NONE, SUCCESS, ERROR} sendType;
+	enum SendType {NONE, IN_PROGRESS, SUCCESS, ERROR} sendType;
 };
 

@@ -74,7 +74,7 @@ int8_t SIM808::writeToPort(
 	uint32_t timeout = _httpTimeout;
 
 	// Variable will be changed in "unexpectedResponse"
-	client->sendType = SIM808TcpClient::SendType::NONE;
+	client->sendType = SIM808TcpClient::SendType::IN_PROGRESS;
 	sendFormatAT(TO_F(TOKEN_TCP_CIPSEND), client->index, size);
 	auto length = readNext(replyBuffer, BUFFER_SIZE, &timeout, '>');
 	write(buf, size);
@@ -82,9 +82,11 @@ int8_t SIM808::writeToPort(
 	//char response[20];
 	//readNext(response, 20, &timeout, '\n');
 
-	waitResponse(timeout, NULL, NULL, NULL, NULL);
-	waitResponse(timeout, NULL, NULL, NULL, NULL);
+	while(timeout && client->sendType == SIM808TcpClient::SendType::IN_PROGRESS){
+		waitResponse(timeout, NULL, NULL, NULL, NULL);
+	}
 	if(client->sendType != SIM808TcpClient::SendType::SUCCESS){
+		Serial.println("Timeout confirming send!");
 		closePort(client);
 		client->_connected = false;
 		return -1;
