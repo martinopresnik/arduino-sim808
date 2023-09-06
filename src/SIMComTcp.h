@@ -28,6 +28,8 @@ class SIM808TcpClient: public Client {
 	friend class SIM808;
 
 public:
+	enum TransmissionState {NONE, IN_PROGRESS, SUCCESS, ERROR};
+
 	int connect(const char *host, uint16_t port);
 
 	/**
@@ -66,6 +68,10 @@ public:
 	}
 	TcpStatus status();
 
+	TransmissionState getTransmissionState();
+	void resetTransmissionState();
+	void setWaitForTransmission(bool waitForTransmission);
+
 protected:
 	const uint8_t index;
 	SIM808TcpClient(SIM808 *sim, uint8_t index, PortType portType);
@@ -77,6 +83,7 @@ protected:
 	std::list<std::vector<uint8_t>> receiveBuffer;
 	size_t bufferIndex;
 	bool _connected;
-	enum SendType {NONE, IN_PROGRESS, SUCCESS, ERROR} sendType;
+	enum TransmissionState transmissionState;
+	bool waitForTransmission;
 };
 

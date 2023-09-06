@@ -70,26 +70,27 @@ int8_t SIM808::openPortConnection(
 int8_t SIM808::writeToPort(
 		SIM808TcpClient *client,
 		const uint8_t *buf,
-		size_t size) {
+		size_t size,
+		bool waitForTransmission) {
 	uint32_t timeout = _httpTimeout;
 
 	// Variable will be changed in "unexpectedResponse"
-	client->sendType = SIM808TcpClient::SendType::IN_PROGRESS;
+	client->transmissionState = SIM808TcpClient::TransmissionState::IN_PROGRESS;
 	sendFormatAT(TO_F(TOKEN_TCP_CIPSEND), client->index, size);
 	auto length = readNext(replyBuffer, BUFFER_SIZE, &timeout, '>');
 	write(buf, size);
 
 	//char response[20];
 	//readNext(response, 20, &timeout, '\n');
-
-	while(timeout && client->sendType == SIM808TcpClient::SendType::IN_PROGRESS){
-		waitResponse(timeout, NULL, NULL, NULL, NULL);
-	}
-	if(client->sendType != SIM808TcpClient::SendType::SUCCESS){
-		Serial.println("Timeout confirming send!");
-		closePort(client);
-		client->_connected = false;
-		return -1;
+	if(waitForTransmission){
+		while(timeout && client->transmissionState == SIM808TcpClient::TransmissionState::IN_PROGRESS){
+			waitResponse(timeout, NULL, NULL, NULL, NULL);
+		}
+		if(client->transmissionState != SIM808TcpClient::TransmissionState::SUCCESS){
+			closePort(client);
+			client->_connected = false;
+			return -1;
+		}
 	}
 
 	return size;
@@ -233,15 +234,16 @@ void SIM808::unexpectedResponse(char *response) {
 		// Examle1: '0, CLOSE OK'
 		if(strstr_P(response, TO_P(", CLOSE")) == &response[1]){
 			portClients[index]->_connected = false;
+			portClients[index]->transmissionState = SIM808TcpClient::TransmissionState::NONE;
 		}
 
 
 		if(strstr_P(response, TO_P(", SEND OK")) == &response[1]){
-			portClients[index]->sendType = SIM808TcpClient::SendType::SUCCESS;
+			portClients[index]->transmissionState = SIM808TcpClient::TransmissionState::SUCCESS;
 		}
 
 		if(strstr_P(response, TO_P(", ERROR")) == &response[1]){
-			portClients[index]->sendType = SIM808TcpClient::SendType::ERROR;
+			portClients[index]->transmissionState = SIM808TcpClient::TransmissionState::ERROR;
 		}
 	}
 

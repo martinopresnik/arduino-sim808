@@ -7,6 +7,9 @@ SIM808TcpClient::SIM808TcpClient(SIM808 *sim, uint8_t index, PortType portType) 
 				bufferIndex(0),
 				defaultWaitForAvailable(false),
 				_connected(false){
+	waitForTransmission = true;
+	transmissionState = NONE;
+	transmitBufferSize = 512;
 }
 
 int SIM808TcpClient::connect(const char *host, uint16_t port) {
@@ -76,7 +79,10 @@ int SIM808TcpClient::peek() {
 }
 
 void SIM808TcpClient::flush() {
-	sim->writeToPort(this, transmitBuffer.data(), transmitBuffer.size());
+	this->transmissionState == IN_PROGRESS;
+	Serial.print("waitForTransmission: ");
+	Serial.println(waitForTransmission);
+	sim->writeToPort(this, transmitBuffer.data(), transmitBuffer.size(), waitForTransmission);
 	transmitBuffer.clear();
 }
 
@@ -102,3 +108,18 @@ uint8_t SIM808TcpClient::connected() {
 TcpStatus SIM808TcpClient::status(){
 	return sim->portStatus(this);
 }
+
+
+SIM808TcpClient::TransmissionState SIM808TcpClient::getTransmissionState(){
+	return transmissionState;
+}
+
+void SIM808TcpClient::resetTransmissionState(){
+	transmissionState = SIM808TcpClient::TransmissionState::NONE;
+}
+
+
+void SIM808TcpClient::setWaitForTransmission(bool waitForTransmission){
+	this->waitForTransmission = waitForTransmission;
+}
+

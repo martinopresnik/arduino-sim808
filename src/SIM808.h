@@ -67,7 +67,7 @@ protected:
 
 
 	int8_t openPortConnection(SIM808TcpClient *client, const char* host, uint16_t port);
-	int8_t writeToPort(SIM808TcpClient *client, const uint8_t *buf, size_t size);
+	int8_t writeToPort(SIM808TcpClient *client, const uint8_t *buf, size_t size, bool waitForTransmission = true);
 	TcpStatus portStatus(SIM808TcpClient *client);
 	void closePort(SIM808TcpClient *client);
 	void unexpectedResponse(char* response) override;
