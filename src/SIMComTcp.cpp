@@ -123,3 +123,6 @@ void SIM808TcpClient::setWaitForTransmission(bool waitForTransmission){
 	this->waitForTransmission = waitForTransmission;
 }
 
+int16_t SIM808TcpClient::nonAcknowlidgedBytes(){
+	return sim->nonAcknowlidgedBytes(this);
+}

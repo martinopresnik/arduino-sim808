@@ -11,6 +11,7 @@ TOKEN_TEXT(TCP_CIPSTATUS, "+CIPSTATUS=%d");
 
 TOKEN_TEXT(TCP_CIPSTART, "+CIPSTART=%d,\"%s\",\"%s\",\"%d\"");
 TOKEN_TEXT(TCP_CIPCLOSE, "+CIPCLOSE=%d,0");
+TOKEN_TEXT(TCP_CIPACK, "+CIPACK=%d");
 
 bool SIM808::initTcpUdp(const char *apn, const char *user, const char *password) {
 	bool allGood = true;
@@ -97,13 +98,13 @@ int8_t SIM808::writeToPort(
 }
 
 TcpStatus SIM808::portStatus(SIM808TcpClient *client){
-	uint32_t timeout = SIMCOMAT_DEFAULT_TIMEOUT;
+	uint32_t timeout = 5000;
 	bool receivedOk = false;
 	bool receivedStatus = false;
 	sendFormatAT(TOKEN_TCP_CIPSTATUS, client->index);
 
 	do{
-		auto response = waitResponse(timeout, "+CIPSTATUS", "OK");
+		auto response = waitResponse(&timeout, "+CIPSTATUS", "OK");
 		receivedOk = response == 1 || receivedOk;
 		receivedStatus = response == 0;
 		if(!timeout){
@@ -154,6 +155,16 @@ TcpStatus SIM808::portStatus(SIM808TcpClient *client){
 void SIM808::closePort(SIM808TcpClient *client) {
 	sendFormatAT(TO_F(TOKEN_TCP_CIPCLOSE), client->index);
 	waitResponse();
+}
+
+int16_t SIM808::nonAcknowlidgedBytes(SIM808TcpClient *client){
+	sendFormatAT(TO_F(TOKEN_TCP_CIPACK), client->index);
+	if(waitResponse("+CIPACK") != 0){
+		return -1;
+	}
+	int16_t result;
+	parse(replyBuffer, ',', 2, &result);
+	return result;
 }
 
 void SIM808::unexpectedResponse(char *response) {

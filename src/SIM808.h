@@ -70,6 +70,7 @@ protected:
 	int8_t writeToPort(SIM808TcpClient *client, const uint8_t *buf, size_t size, bool waitForTransmission = true);
 	TcpStatus portStatus(SIM808TcpClient *client);
 	void closePort(SIM808TcpClient *client);
+	int16_t nonAcknowlidgedBytes(SIM808TcpClient *client);
 	void unexpectedResponse(char* response) override;
 public:
 	SIM808(uint8_t resetPin, uint8_t pwrKeyPin = SIM808_UNAVAILABLE_PIN, uint8_t statusPin = SIM808_UNAVAILABLE_PIN);

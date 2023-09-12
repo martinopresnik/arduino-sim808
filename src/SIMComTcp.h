@@ -71,6 +71,7 @@ public:
 	TransmissionState getTransmissionState();
 	void resetTransmissionState();
 	void setWaitForTransmission(bool waitForTransmission);
+	int16_t nonAcknowlidgedBytes();
 
 protected:
 	const uint8_t index;

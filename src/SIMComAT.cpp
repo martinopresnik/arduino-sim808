@@ -59,6 +59,15 @@ size_t SIMComAT::readNext(char * buffer, size_t size, uint32_t * timeout, char s
 }
 
 int8_t SIMComAT::waitResponse(uint32_t timeout,
+	ATConstStr s1,
+	ATConstStr s2,
+	ATConstStr s3,
+	ATConstStr s4)
+{
+	return waitResponse(&timeout, s1, s2, s3, s4);
+}
+
+int8_t SIMComAT::waitResponse(uint32_t *timeout,
 	ATConstStr s1, 
 	ATConstStr s2,
 	ATConstStr s3,
@@ -69,7 +78,7 @@ int8_t SIMComAT::waitResponse(uint32_t timeout,
 
 	do {
 		memset(replyBuffer, 0, BUFFER_SIZE);
-		length = readNext(replyBuffer, BUFFER_SIZE, &timeout, '\n');
+		length = readNext(replyBuffer, BUFFER_SIZE, timeout, '\n');
 
 		if(!length) continue; 					//read nothing
 
@@ -85,7 +94,7 @@ int8_t SIMComAT::waitResponse(uint32_t timeout,
 			unexpectedResponse(replyBuffer);
 		}
 		if(wantedTokens[0] == NULL) return 0;	//looking for a line with any content
-	} while(timeout);
+	} while(*timeout);
 
 	return -1;
 }

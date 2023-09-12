@@ -92,6 +92,12 @@ protected:
 		ATConstStr s2 = TO_F(TOKEN_ERROR),
 		ATConstStr s3 = NULL,
 		ATConstStr s4 = NULL);
+
+	int8_t waitResponse(uint32_t *timeout,
+		ATConstStr s1 = TO_F(TOKEN_OK),
+		ATConstStr s2 = TO_F(TOKEN_ERROR),
+		ATConstStr s3 = NULL,
+		ATConstStr s4 = NULL);
 		
 	/**
 	 * Read the current response line and copy it in response. Start at replyBuffer + shift
