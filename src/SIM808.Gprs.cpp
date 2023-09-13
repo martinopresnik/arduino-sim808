@@ -48,7 +48,7 @@ bool SIM808::enableGprs(const char *apn, const char* user, const char *password)
 	strcpy_P(gprsToken, TOKEN_GPRS);
 
 	return 
-		(sendAT(TO_F(TOKEN_CIPSHUT)), waitResponse(65000L, TO_F(TOKEN_SHUT_OK)) == 0) &&					//AT+CIPSHUT
+		//(sendAT(TO_F(TOKEN_CIPSHUT)), waitResponse(65000L, TO_F(TOKEN_SHUT_OK)) == 0) &&					//AT+CIPSHUT
 		(sendFormatAT(TO_F(AT_COMMAND_GPRS_ATTACH), 1), waitResponse(10000L) == 0) &&						//AT+CGATT=1
 
 		(setBearerSetting(TO_F(AT_COMMAND_PARAMETER_BEARER_CONTYPE), gprsToken)) &&							//AT+SAPBR=3,1,"CONTYPE","GPRS"
