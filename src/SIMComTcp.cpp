@@ -10,6 +10,8 @@ SIM808TcpClient::SIM808TcpClient(SIM808 *sim, uint8_t index, PortType portType) 
 	waitForTransmission = true;
 	transmissionState = NONE;
 	transmitBufferSize = 512;
+	lastConnectedCall = 0;
+	lastConnectedStatus = UNKNOWN;
 }
 
 int SIM808TcpClient::connect(const char *host, uint16_t port) {
@@ -48,14 +50,16 @@ int SIM808TcpClient::available(void) {
 }
 
 int SIM808TcpClient::available(bool check) {
-	if (check) {
-		sim->waitResponse(10);
-	}
 
 	size_t size = 0;
 	for (auto &chunk : receiveBuffer) {
 		size += chunk.size();
 	}
+
+	if (size == 0 && check) {
+		sim->waitResponse(10);
+	}
+
 	return size;
 }
 
@@ -101,8 +105,13 @@ void SIM808TcpClient::stop() {
 	sim->closePort(this);
 }
 uint8_t SIM808TcpClient::connected() {
-	auto stat = status();
-	return stat == CONNECTED;
+	// Cache status for 0.1s
+	if((millis() - lastConnectedCall) < 100 && lastConnectedStatus == CONNECTED){
+		return lastConnectedStatus;
+	}
+	lastConnectedStatus = status();
+	lastConnectedCall = millis();
+	return lastConnectedStatus == CONNECTED;
 }
 
 TcpStatus SIM808TcpClient::status(){

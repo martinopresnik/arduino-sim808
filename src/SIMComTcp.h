@@ -86,5 +86,8 @@ protected:
 	bool _connected;
 	enum TransmissionState transmissionState;
 	bool waitForTransmission;
+
+	unsigned long lastConnectedCall;
+	TcpStatus lastConnectedStatus;
 };
 

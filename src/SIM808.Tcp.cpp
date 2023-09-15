@@ -206,13 +206,13 @@ void SIM808::unexpectedResponse(char *response) {
 
 
 		double tmpTimeout = dataSize * 1.05; // Calculated for 9600 baudrate, change for other baudrates
-		unsigned long timeout = (unsigned long)(tmpTimeout) + 1000; // Add a sec for reliability
+		unsigned long timeout = (unsigned long)(tmpTimeout) + 5000; // Add 5sec for reliability
 
 
 		auto receiveStartTime = millis();
 
 		RECEIVEARROW;
-		for (int i = 0; i < dataSize; ++i) {
+		for (volatile int i = 0; i < dataSize; ++i) {
 			while (!available()){
 				if(millis() - receiveStartTime > timeout){
 					Serial.println("TCP/UDP Receive timeout!");
