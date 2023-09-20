@@ -84,6 +84,7 @@ protected:
 	std::list<std::vector<uint8_t>> receiveBuffer;
 	size_t bufferIndex;
 	bool _connected;
+	int transmissionsToConfirm;
 	enum TransmissionState transmissionState;
 	bool waitForTransmission;
 

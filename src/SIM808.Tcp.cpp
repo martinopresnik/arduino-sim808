@@ -93,7 +93,7 @@ int8_t SIM808::writeToPort(
 			return -1;
 		}
 	}
-
+	client->transmissionsToConfirm++;
 	return size;
 }
 
@@ -250,7 +250,10 @@ void SIM808::unexpectedResponse(char *response) {
 
 
 		if(strstr_P(response, TO_P(", SEND OK")) == &response[1]){
-			portClients[index]->transmissionState = SIM808TcpClient::TransmissionState::SUCCESS;
+			portClients[index]->transmissionsToConfirm--;
+			if(portClients[index]->transmissionsToConfirm == 0){
+				portClients[index]->transmissionState = SIM808TcpClient::TransmissionState::SUCCESS;
+			}
 		}
 
 		if(strstr_P(response, TO_P(", ERROR")) == &response[1]){

@@ -12,6 +12,7 @@ SIM808TcpClient::SIM808TcpClient(SIM808 *sim, uint8_t index, PortType portType) 
 	transmitBufferSize = 512;
 	lastConnectedCall = 0;
 	lastConnectedStatus = UNKNOWN;
+	transmissionsToConfirm = 0;
 }
 
 int SIM808TcpClient::connect(const char *host, uint16_t port) {
