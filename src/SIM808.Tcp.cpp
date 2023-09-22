@@ -81,6 +81,8 @@ int8_t SIM808::writeToPort(
 	auto length = readNext(replyBuffer, BUFFER_SIZE, &timeout, '>');
 	write(buf, size);
 
+
+	client->transmissionsToConfirm++;
 	//char response[20];
 	//readNext(response, 20, &timeout, '\n');
 	if(waitForTransmission){
@@ -93,7 +95,6 @@ int8_t SIM808::writeToPort(
 			return -1;
 		}
 	}
-	client->transmissionsToConfirm++;
 	return size;
 }
 
@@ -251,7 +252,9 @@ void SIM808::unexpectedResponse(char *response) {
 
 		if(strstr_P(response, TO_P(", SEND OK")) == &response[1]){
 			portClients[index]->transmissionsToConfirm--;
-			if(portClients[index]->transmissionsToConfirm == 0){
+			Serial.print("transmissionsToConfirm: ");
+			Serial.println(portClients[index]->transmissionsToConfirm);
+			if(portClients[index]->transmissionsToConfirm <= 0){
 				portClients[index]->transmissionState = SIM808TcpClient::TransmissionState::SUCCESS;
 			}
 		}

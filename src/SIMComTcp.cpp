@@ -16,6 +16,7 @@ SIM808TcpClient::SIM808TcpClient(SIM808 *sim, uint8_t index, PortType portType) 
 }
 
 int SIM808TcpClient::connect(const char *host, uint16_t port) {
+	transmissionsToConfirm = 0;
 	if(connected()){
 		return 0;
 	}
