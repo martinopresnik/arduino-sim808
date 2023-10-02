@@ -16,6 +16,8 @@ TOKEN_TEXT(SHUT_OK, "SHUT OK");
 TOKEN_TEXT(CGREG, "+CGREG");
 TOKEN_TEXT(CLTS, "+CLTS");
 
+TOKEN_TEXT(CFUN_RESET, "+CFUN=1,1");
+
 bool SIM808::setBearerSetting(ATConstStr parameter, const char* value)
 {
 	sendFormatAT(TO_F(AT_COMMAND_SET_BEARER_SETTING_PARAMETER), parameter, value);
@@ -67,6 +69,13 @@ bool SIM808::disableGprs()
 		(sendFormatAT(TO_F(AT_COMMAND_SET_BEARER_SETTING), 0, 1), waitResponse(65000L) != -1) &&			//AT+SAPBR=0,1
 		(sendAT(TO_F(TOKEN_CIPSHUT)), waitResponse(65000L, TO_F(TOKEN_SHUT_OK)) == 0) &&					//AT+CIPSHUT
 		(sendFormatAT(TO_F(AT_COMMAND_GPRS_ATTACH), 0), waitResponse(10000L) == 0);							//AT+CGATT=0
+}
+
+bool SIM808::resetGprs(){
+	sendAT(TO_F(TOKEN_CFUN_RESET));
+	bool result = waitResponse() == 0;
+	waitResponse(30000, "+CIEV");
+	return result;
 }
 
 bool SIM808::gprsEnabled(){

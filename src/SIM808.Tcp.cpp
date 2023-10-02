@@ -24,7 +24,8 @@ bool SIM808::initTcpUdp(const char *apn, const char *user, const char *password)
 	sendFormatAT(TO_F(TOKEN_TCP_CIICR));
 	allGood &= waitResponse() == 0;
 	sendFormatAT(TO_F(TOKEN_TCP_CIFSR));
-	allGood &= waitResponse() == 0;
+	//allGood &= waitResponse() == 0;
+	waitResponse();
 	return allGood;
 }
 
@@ -64,8 +65,9 @@ int8_t SIM808::openPortConnection(
 	waitResponse();
 	char indexStr[2];
 	sprintf(indexStr, "%d", client->index);
-	client->_connected = waitResponse(_httpTimeout, indexStr) == 0;
-	return 0;
+	auto responseIndex = waitResponse(_httpTimeout, indexStr, TO_F(TOKEN_ERROR));
+	client->_connected = responseIndex == 0;
+	return responseIndex;
 }
 
 int8_t SIM808::writeToPort(

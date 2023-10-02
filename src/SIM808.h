@@ -157,6 +157,7 @@ public:
 	 * Shutdown GPRS properly.
 	 */
 	bool disableGprs();
+	bool resetGprs();
 
 	bool gprsEnabled();
 
