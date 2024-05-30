@@ -79,6 +79,7 @@ size_t SIM808::sendCommand(const char *cmd, char *response, size_t responseSize)
 	
 	uint32_t timeout = SIMCOMAT_DEFAULT_TIMEOUT;
 	readNext(response, responseSize, &timeout);
+	return responseSize;
 }
 
 #pragma endregion

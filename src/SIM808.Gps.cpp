@@ -21,6 +21,7 @@ bool SIM808::getGpsPosition(char *response, size_t responseSize)
 
 	// GPSINF response might be too long for the reply buffer
 	copyCurrentLine(response, responseSize, strlen_P(TOKEN_GPS_INFO) + 2);
+	return true;
 }
 
 void SIM808::getGpsField(const char* response, SIM808GpsField field, char** result) 
