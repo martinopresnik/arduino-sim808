@@ -133,6 +133,10 @@ public:
 	 * Get the device IMEI number.
 	 */
 	size_t getImei(char* imei, size_t imeiSize);
+	/**
+	 * Get the sim card CCID number.
+	 */
+	size_t getCcid(char* ccid, size_t ccidSize);
 
 	/**
 	 * Get current GSM signal quality, estimated attenuation in dB and error rate.

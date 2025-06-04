@@ -239,7 +239,7 @@ void SIM808::unexpectedResponse(char *response) {
 
 		uint8_t index = (uint8_t)strtoul(response, NULL, 10);
 		if(index >= PORTS_NUM){
-			SIM808_PRINT_SIMPLE_P("Wrong index, this should never occur!!!");
+			// SIM808_PRINT_SIMPLE_P("Wrong index, this should never occur!!!");
 			return;
 		}
 

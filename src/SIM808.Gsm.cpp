@@ -51,6 +51,23 @@ size_t SIM808::getImei(char *imei, size_t imeiSize)
 		0;
 }
 
+size_t SIM808::getCcid(char *ccid, size_t ccidSize)
+{
+	//AT+GSN does not have a response prefix, so we need to flush input
+	//before sending the command
+	flushInput();
+
+	sendAT(S_F("+CCID"));
+	waitResponse(SIMCOMAT_DEFAULT_TIMEOUT, NULL); //consuming an extra line before the response. Undocumented
+
+	if(waitResponse(SIMCOMAT_DEFAULT_TIMEOUT, NULL) != 0) return 0;
+	copyCurrentLine(ccid, ccidSize);
+
+	return waitResponse() == 0?
+		strlen(ccid) :
+		0;
+}
+
 SIM808SignalQualityReport SIM808::getSignalQuality()
 {
 	uint8_t quality;
