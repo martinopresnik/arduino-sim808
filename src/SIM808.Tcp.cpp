@@ -212,13 +212,26 @@ void SIM808::unexpectedResponse(char *response) {
 		unsigned long timeout = (unsigned long)(tmpTimeout) + 5000; // Add 5sec for reliability
 
 
-		auto receiveStartTime = millis();
+
+		unsigned long receiveStartTime = millis();
+		Serial.print("receiveStartTime: ");
+		Serial.println(receiveStartTime);
 
 		RECEIVEARROW;
+
 		for (volatile int i = 0; i < dataSize; ++i) {
-			while (!available()){
-				if(millis() - receiveStartTime > timeout){
+			while (available() == 0){
+				if((millis() - receiveStartTime) > timeout){
 					Serial.println("TCP/UDP Receive timeout!");
+					Serial.println(timeout);
+					Serial.println(millis());
+					Serial.println(receiveStartTime);
+					Serial.print("Currently at index: ");
+					Serial.println(i);
+
+					Serial.print("Out of size: ");
+					Serial.println(dataSize);
+
 					portClients[portIndex]->stop();
 					return;
 				}

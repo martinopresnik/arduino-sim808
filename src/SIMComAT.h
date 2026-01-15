@@ -57,12 +57,16 @@ protected:
 
 	template<typename... Args> void sendAT(Args... cmd)
 	{
+		unexpectedDataOnSerial();
+
 		SENDARROW;
 		writeStream(TO_F(TOKEN_AT), cmd..., TO_F(TOKEN_NL));
 	}
 
 	template<typename T, typename... Args> void sendFormatAT(T format, Args... args)
 	{
+		unexpectedDataOnSerial();
+
 		SENDARROW;
 		writeStream(TO_F(TOKEN_AT));
 		_output.verbose(format, args...);
@@ -79,6 +83,7 @@ protected:
 	 * 
 	 */
 	size_t readNext(char * buffer, size_t size, uint32_t * timeout = NULL, char stop = 0);
+	void unexpectedDataOnSerial();
 	int8_t waitResponse(
 		ATConstStr s1 = TO_F(TOKEN_OK),
 		ATConstStr s2 = TO_F(TOKEN_ERROR),

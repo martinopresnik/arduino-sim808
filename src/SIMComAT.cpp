@@ -58,6 +58,21 @@ size_t SIMComAT::readNext(char * buffer, size_t size, uint32_t * timeout, char s
 	return i > 0 ? i - 1 : i;
 }
 
+
+void SIMComAT::unexpectedDataOnSerial(){
+	size_t length;
+	if(!available()){
+		return;
+	}
+	uint32_t timeout = 10;
+	memset(replyBuffer, 0, BUFFER_SIZE);
+	length = readNext(replyBuffer, BUFFER_SIZE, &timeout, '\n');
+	if(strcmp(replyBuffer, TO_P("\r\n")) != 0){
+		unexpectedResponse(replyBuffer);
+	}
+}
+
+
 int8_t SIMComAT::waitResponse(uint32_t timeout,
 	ATConstStr s1,
 	ATConstStr s2,

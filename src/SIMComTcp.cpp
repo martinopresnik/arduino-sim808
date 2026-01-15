@@ -112,6 +112,9 @@ uint8_t SIM808TcpClient::connected() {
 		return lastConnectedStatus;
 	}
 	lastConnectedStatus = status();
+	if(lastConnectedStatus == UNKNOWN){
+		lastConnectedStatus = status();
+	}
 	lastConnectedCall = millis();
 	return lastConnectedStatus == CONNECTED;
 }
