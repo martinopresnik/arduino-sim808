@@ -44,12 +44,14 @@ void SIM808::init()
 
 void SIM808::reset()
 {
-	digitalWrite(_resetPin, HIGH);
-	delay(10);
-	digitalWrite(_resetPin, LOW);
-	delay(200);
+	if(_resetPin != SIM808_UNAVAILABLE_PIN){
+		digitalWrite(_resetPin, HIGH);
+		delay(10);
+		digitalWrite(_resetPin, LOW);
+		delay(200);
 
-	digitalWrite(_resetPin, HIGH);
+		digitalWrite(_resetPin, HIGH);
+	}
 }
 
 void SIM808::waitForReady()
